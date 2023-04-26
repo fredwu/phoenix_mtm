@@ -151,6 +151,19 @@ defmodule PhoenixMTM.HelpersTest do
              ~s(<input checked id=\"form_collection_1\" name=\"form[collection][]\" type=\"checkbox\" value=\"1\"><label for=\"form_collection_1\">1</label><input id=\"form_collection_2\" name=\"form[collection][]\" type=\"checkbox\" value=\"2\"><label for=\"form_collection_2\">2</label>)
   end
 
+  test "generates list of checkboxes and inputs with auto selected element" do
+    form =
+      safe_to_string(
+        form_for(conn(), "/", [as: :form], fn f ->
+          f = Map.put(f, :data, %{collection: [%{id: 1}]})
+          collection_checkboxes(f, :collection, "1": 1, "2": 2)
+        end)
+      )
+
+    assert form =~
+             ~s(<input checked id=\"form_collection_1\" name=\"form[collection][]\" type=\"checkbox\" value=\"1\"><label for=\"form_collection_1\">1</label><input id=\"form_collection_2\" name=\"form[collection][]\" type=\"checkbox\" value=\"2\"><label for=\"form_collection_2\">2</label>)
+  end
+
   test "generates hidden input" do
     form =
       safe_to_string(
@@ -161,6 +174,43 @@ defmodule PhoenixMTM.HelpersTest do
 
     assert form =~
              ~s(<input id=\"form_collection\" name=\"form[collection][]\" type=\"hidden\" value=\"\">)
+  end
+
+  describe "live view" do
+    test "generates list of checkboxes and inputs with auto selected element" do
+      form =
+        safe_to_string(
+          form_for(conn(), "/", [as: :form], fn f ->
+            f =
+              f
+              |> Map.put(:data, %{collection: [%{id: 1}]})
+              |> Map.put(:source, Map.put(f.source, :changes, %{}))
+
+            collection_checkboxes(f, :collection, "1": 1, "2": 2)
+          end)
+        )
+
+      assert form =~
+               ~s(<input checked id=\"form_collection_1\" name=\"form[collection][]\" type=\"checkbox\" value=\"1\"><label for=\"form_collection_1\">1</label><input id=\"form_collection_2\" name=\"form[collection][]\" type=\"checkbox\" value=\"2\"><label for=\"form_collection_2\">2</label>)
+    end
+
+    test "generates list of checkboxes and inputs with user selection" do
+      form =
+        safe_to_string(
+          form_for(conn(), "/", [as: :form], fn f ->
+            f =
+              f
+              |> Map.put(:data, %{collection: [%{id: 1}]})
+              |> Map.put(:source, Map.put(f.source, :changes, %{collection: []}))
+              |> Map.put(:params, %{"collection" => [2]})
+
+            collection_checkboxes(f, :collection, "1": 1, "2": 2)
+          end)
+        )
+
+      assert form =~
+               ~s(<input id=\"form_collection_1\" name=\"form[collection][]\" type=\"checkbox\" value=\"1\"><label for=\"form_collection_1\">1</label><input checked id=\"form_collection_2\" name=\"form[collection][]\" type=\"checkbox\" value=\"2\"><label for=\"form_collection_2\">2</label>)
+    end
   end
 
   def remove_outside_whitespace(string) do

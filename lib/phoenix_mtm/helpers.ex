@@ -25,7 +25,9 @@ defmodule PhoenixMTM.Helpers do
 
   ## Options
 
-    * `:selected` - a list of options that should be pre-selected
+    * `:selected` - a list of options that should be pre-selected, this is optional,
+                    PhoenixMTM will try to detect it automatically. More importantly,
+                    in LiveView this option should not be set
     * `:input_opts` - a list of attributes to be applied to each checkbox input
     * `:label_opts` - a list of attributes to be applied to each checkbox label
     * `:wrapper` - a function to wrap the HTML structure of each checkbox/label
@@ -82,7 +84,7 @@ defmodule PhoenixMTM.Helpers do
   """
   def collection_checkboxes(form, field, collection, opts \\ []) do
     name = input_name(form, field) <> "[]"
-    selected = Keyword.get(opts, :selected, [])
+    selected = Keyword.get(opts, :selected, auto_selected(form, field))
     input_opts = Keyword.get(opts, :input_opts, [])
     label_opts = Keyword.get(opts, :label_opts, [])
     mapper = Keyword.get(opts, :mapper, &PhoenixMTM.Mappers.unwrapped/6)
@@ -123,6 +125,20 @@ defmodule PhoenixMTM.Helpers do
         hidden_input(form, field, name: name, value: "")
     )
   end
+
+  defp auto_selected(%{source: source, data: data, params: params}, field) do
+    changes = Map.get(source, :changes)
+
+    if is_nil(changes) || changes == %{} do
+      data
+      |> Map.get(field, [])
+      |> Enum.map(& &1.id)
+    else
+      Map.get(params, "#{field}", [])
+    end
+  end
+
+  defp auto_selected(_form, _field), do: []
 
   defp put_selected(opts, selected, value) do
     if Enum.member?(selected, value) do
