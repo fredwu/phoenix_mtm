@@ -4,7 +4,7 @@ defmodule PhoenixMTM.Helpers do
   """
 
   import Phoenix.HTML, only: [html_escape: 1]
-  import Phoenix.HTML.Form, only: [input_name: 2, input_id: 2, hidden_input: 3 ]
+  import Phoenix.HTML.Form, only: [input_name: 2, input_id: 2, hidden_input: 3]
 
   @doc ~S"""
   Generates a list of checkboxes and labels to update a Phoenix
@@ -86,38 +86,41 @@ defmodule PhoenixMTM.Helpers do
     input_opts = Keyword.get(opts, :input_opts, [])
     label_opts = Keyword.get(opts, :label_opts, [])
     mapper = Keyword.get(opts, :mapper, &PhoenixMTM.Mappers.unwrapped/6)
-    wrapper = Keyword.get(opts, :wrapper, &(&1))
+    wrapper = Keyword.get(opts, :wrapper, & &1)
 
-    mapper = if {:nested, true} in opts do
-      IO.write :stderr, """
-      warning: using nested option is deprecated. Use nested mapper instead.
-      #{Exception.format_stacktrace}
-      """
-      &PhoenixMTM.Mappers.nested/6
-    else
-      mapper
-    end
+    mapper =
+      if {:nested, true} in opts do
+        IO.write(:stderr, """
+        warning: using nested option is deprecated. Use nested mapper instead.
+        #{Exception.format_stacktrace()}
+        """)
 
-    inputs = Enum.map(collection, fn {label_content, value} ->
-      id = input_id(form, field) <> "_#{value}"
+        &PhoenixMTM.Mappers.nested/6
+      else
+        mapper
+      end
 
-      input_opts =
-        input_opts
-        |> Keyword.put(:type, "checkbox")
-        |> Keyword.put(:id, id)
-        |> Keyword.put(:name, name)
-        |> Keyword.put(:value, "#{value}")
-        |> put_selected(selected, value)
+    inputs =
+      Enum.map(collection, fn {label_content, value} ->
+        id = input_id(form, field) <> "_#{value}"
 
-      label_opts = label_opts ++ [for: id]
+        input_opts =
+          input_opts
+          |> Keyword.put(:type, "checkbox")
+          |> Keyword.put(:id, id)
+          |> Keyword.put(:name, name)
+          |> Keyword.put(:value, "#{value}")
+          |> put_selected(selected, value)
 
-      mapper.(form, field, input_opts, label_content, label_opts, opts)
-      |> wrapper.()
-    end)
+        label_opts = label_opts ++ [for: id]
+
+        mapper.(form, field, input_opts, label_content, label_opts, opts)
+        |> wrapper.()
+      end)
 
     html_escape(
       inputs ++
-      hidden_input(form, field, [name: name, value: ""])
+        hidden_input(form, field, name: name, value: "")
     )
   end
 
