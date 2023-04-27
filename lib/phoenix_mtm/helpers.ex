@@ -127,24 +127,29 @@ defmodule PhoenixMTM.Helpers do
   end
 
   def auto_selected(%{source: source, data: data, params: params}, field) do
-    if params = Map.get(params, "#{field}") do
-      params
-    else
-      case Map.get(data, field) do
-        %Ecto.Association.NotLoaded{} ->
-          []
-
-        _ ->
-          changes = Map.get(source, :changes)
-
-          if is_nil(changes) || changes == %{} do
-            data
-            |> Map.get(field, [])
-            |> Enum.map(& &1.id)
-          else
+    case Map.get(params, "#{field}") do
+      nil ->
+        case Map.get(data, field) do
+          %Ecto.Association.NotLoaded{} ->
             []
-          end
-      end
+
+          _ ->
+            changes = Map.get(source, :changes)
+
+            if is_nil(changes) || changes == %{} do
+              data
+              |> Map.get(field, [])
+              |> Enum.map(& &1.id)
+            else
+              []
+            end
+        end
+
+      "" ->
+        []
+
+      params ->
+        params
     end
   end
 
