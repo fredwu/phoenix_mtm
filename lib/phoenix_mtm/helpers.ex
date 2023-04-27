@@ -126,7 +126,7 @@ defmodule PhoenixMTM.Helpers do
     )
   end
 
-  defp auto_selected(%{source: source, data: data, params: params}, field) do
+  def auto_selected(%{source: source, data: data, params: params}, field) do
     if params = Map.get(params, "#{field}") do
       params
     else
@@ -148,7 +148,7 @@ defmodule PhoenixMTM.Helpers do
     end
   end
 
-  defp auto_selected(_form, _field), do: []
+  def auto_selected(_form, _field), do: []
 
   defp put_selected(opts, selected, value) do
     if Enum.member?(selected, value) do
