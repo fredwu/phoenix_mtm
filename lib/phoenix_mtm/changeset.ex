@@ -74,7 +74,7 @@ defmodule PhoenixMTM.Changeset do
   defp perform_cast(set, assoc, lookup_fn) do
     case Map.fetch(set.params, to_string(assoc)) do
       {:ok, ""} ->
-        set
+        put_assoc(set, assoc, [])
 
       {:ok, ids} ->
         changes =

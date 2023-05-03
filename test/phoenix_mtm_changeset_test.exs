@@ -13,7 +13,7 @@ defmodule PhoenixMTM.ChangesetTest do
 
   defmodule Photo do
     use Ecto.Schema
-    import Ecto.Changeset, only: [cast: 3]
+    import Ecto.Changeset, only: [cast: 3, validate_length: 3]
     import Ecto.Query
 
     schema "photos" do
@@ -28,6 +28,7 @@ defmodule PhoenixMTM.ChangesetTest do
       struct
       |> cast(params, ~w())
       |> PhoenixMTM.Changeset.cast_collection(:tags, TestRepo, Tag)
+      |> validate_length(:tags, min: 1)
     end
 
     def custom_function_changeset(struct, params \\ %{}) do
@@ -109,9 +110,8 @@ defmodule PhoenixMTM.ChangesetTest do
   test "handles empty string as the assoc" do
     changeset = Photo.changeset(%Photo{}, %{tags: ""})
 
-    photo = TestRepo.insert!(changeset)
-    photo = TestRepo.get(Photo, photo.id) |> TestRepo.preload(:tags)
-
-    assert photo.tags == []
+    assert_raise Ecto.InvalidChangesetError, fn ->
+      TestRepo.insert!(changeset)
+    end
   end
 end
