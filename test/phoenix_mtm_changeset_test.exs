@@ -105,4 +105,13 @@ defmodule PhoenixMTM.ChangesetTest do
 
     assert photo.tags == [tag_1]
   end
+
+  test "handles empty string as the assoc" do
+    changeset = Photo.changeset(%Photo{}, %{tags: ""})
+
+    photo = TestRepo.insert!(changeset)
+    photo = TestRepo.get(Photo, photo.id) |> TestRepo.preload(:tags)
+
+    assert photo.tags == []
+  end
 end
