@@ -68,7 +68,7 @@ defmodule PhoenixMTM.Changeset do
   end
 
   defp all(ids, repo, mod) do
-    repo.all(from m in mod, where: m.id in ^ids)
+    repo.all(from(m in mod, where: m.id in ^ids))
   end
 
   defp perform_cast(set, assoc, lookup_fn) do
@@ -82,6 +82,7 @@ defmodule PhoenixMTM.Changeset do
           |> Enum.map(&change/1)
 
         put_assoc(set, assoc, changes)
+
       :error ->
         set
     end

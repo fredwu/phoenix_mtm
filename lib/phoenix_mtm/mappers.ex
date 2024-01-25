@@ -20,9 +20,8 @@ defmodule PhoenixMTM.Mappers do
   This is not required, as you can manually include which ever imports you want.
   """
 
-  import Phoenix.HTML.Form
-  import Phoenix.HTML.Tag
   import Phoenix.HTML
+  use PhoenixHTMLHelpers
 
   @doc ~S"""
   Checkbox input and label returned as a 2 element list - the default.
@@ -98,7 +97,6 @@ defmodule PhoenixMTM.Mappers do
     quote do
       import Phoenix.HTML
       import Phoenix.HTML.Form
-      import Phoenix.HTML.Tag
     end
   end
 end
